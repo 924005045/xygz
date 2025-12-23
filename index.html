@@ -2352,8 +2352,9 @@
                 document.getElementById('myBirthdayDays').textContent = diffDays;
                 document.getElementById('myBirthdayDate').textContent = formatDateShort(birthdayThisYear);
             } catch (error) {
+                console.error('生日计算错误:', error);
                 document.getElementById('myBirthdayDays').textContent = '0';
-                document.getElementById('myBirthdayDate').textContent = '1998-10-09';
+                document.getElementById('myBirthdayDate').textContent = '计算中...';
             }
         }
         
@@ -2369,22 +2370,122 @@
             document.getElementById('meetDate').textContent = `从2025-09-29开始`;
         }
         
-        function getMyBirthdaySolar() {
-            return new Date(1998, 9, 9);
+        // 获取中秋节日期（农历八月十五）
+        function getMidAutumnDate(year) {
+            // 中秋节日期表（农历八月十五对应的公历日期）
+            const midAutumnDates = {
+                2024: '2024-09-17',
+                2025: '2025-10-06',
+                2026: '2026-09-25',
+                2027: '2027-09-15',
+                2028: '2028-10-03',
+                2029: '2029-09-22',
+                2030: '2030-09-12',
+                2031: '2031-10-01',
+                2032: '2032-09-19',
+                2033: '2033-10-08',
+                2034: '2034-09-27',
+                2035: '2035-09-17',
+                2036: '2036-10-05',
+                2037: '2037-09-24',
+                2038: '2038-09-14',
+                2039: '2039-10-03',
+                2040: '2040-09-21'
+            };
+            
+            // 如果年份在表中，直接返回
+            if (midAutumnDates[year]) {
+                const dateStr = midAutumnDates[year];
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
+            }
+            
+            // 如果年份不在表中，使用公式计算近似值
+            // 这个公式基于2000-2040年的中秋节日期模式推导
+            const baseYear = 2000;
+            const baseDate = new Date(2000, 8, 12); // 2000年中秋节：9月12日
+            
+            // 计算与基准年的年差
+            const yearDiff = year - baseYear;
+            
+            // 农历每年比公历少约11天，加上闰月调整
+            const lunarDaysPerYear = 354.367; // 农历平均年长
+            const solarDaysPerYear = 365.2422; // 公历平均年长
+            const daysDiffPerYear = solarDaysPerYear - lunarDaysPerYear; // 约10.875天
+            
+            // 计算中秋节日期的近似偏移
+            const approximateOffset = Math.floor(yearDiff * daysDiffPerYear);
+            
+            // 创建新日期
+            const approximateDate = new Date(baseDate);
+            approximateDate.setFullYear(year);
+            approximateDate.setDate(approximateDate.getDate() + approximateOffset);
+            
+            // 调整到9月或10月（中秋节通常在9月中旬到10月上旬）
+            const month = approximateDate.getMonth() + 1;
+            if (month < 9) {
+                approximateDate.setMonth(8); // 9月
+            } else if (month > 10) {
+                approximateDate.setMonth(9); // 10月
+            }
+            
+            // 进一步调整到15号左右（中秋节是十五）
+            const day = approximateDate.getDate();
+            if (day < 10) {
+                approximateDate.setDate(15);
+            } else if (day > 20) {
+                approximateDate.setDate(15);
+            }
+            
+            return approximateDate;
         }
         
         function getMyBirthdayThisYear() {
-            const solarBirthday = getMyBirthdaySolar();
             const now = new Date();
             const currentYear = now.getFullYear();
             
-            let birthdayThisYear = new Date(currentYear, solarBirthday.getMonth(), solarBirthday.getDate());
+            // 计算当前年份的中秋节日期（农历八月十五）
+            const midAutumnDate = getMidAutumnDate(currentYear);
             
-            if (birthdayThisYear < now) {
-                birthdayThisYear.setFullYear(currentYear + 1);
+            // 中秋节后第四天就是生日（农历八月十九）
+            const birthday = new Date(midAutumnDate);
+            birthday.setDate(birthday.getDate() + 4);
+            
+            // 如果生日已经过了，计算下一年的生日
+            if (birthday < now) {
+                const nextYear = currentYear + 1;
+                const nextMidAutumn = getMidAutumnDate(nextYear);
+                const nextBirthday = new Date(nextMidAutumn);
+                nextBirthday.setDate(nextBirthday.getDate() + 4);
+                return nextBirthday;
             }
             
-            return birthdayThisYear;
+            return birthday;
+        }
+        
+        // 测试函数，验证计算结果
+        function testBirthdayCalculation() {
+            console.log('测试萧哥生日计算：');
+            
+            // 测试已知年份
+            const testYears = [2024, 2025, 2026, 2027, 2028, 2029, 2030];
+            
+            testYears.forEach(year => {
+                const midAutumn = getMidAutumnDate(year);
+                const birthday = new Date(midAutumn);
+                birthday.setDate(birthday.getDate() + 4);
+                
+                console.log(`${year}年：`);
+                console.log(`  中秋节：${formatDateShort(midAutumn)}`);
+                console.log(`  萧哥生日：${formatDateShort(birthday)}`);
+                console.log(`  （农历八月十九，中秋节后第四天）`);
+            });
+            
+            // 测试当前年份
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentBirthday = getMyBirthdayThisYear();
+            console.log(`\n${currentYear}年萧哥生日：${formatDateShort(currentBirthday)}`);
         }
         
         const scorpioHoroscopes = [
@@ -3054,6 +3155,9 @@
             startHeartAnimation();
             createStarBackground();
             
+            // 测试生日计算（可选，调试时使用）
+            // testBirthdayCalculation();
+            
             window.addEventListener('resize', function() {
                 createFullscreenText();
                 createStarBackground();
@@ -3062,6 +3166,3 @@
     </script>
 </body>
 </html>
-
-
-
