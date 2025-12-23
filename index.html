@@ -888,7 +888,7 @@
             width: 100%;
             display: flex;
             justify-content: space-between;
-            padding: 0 35px;
+            padding: 0 25px;
             pointer-events: none;
         }
 
@@ -897,6 +897,8 @@
             flex-direction: column;
             align-items: center;
             position: relative;
+            width: auto;
+            flex: 0 0 auto;
         }
 
         .boy-icon, .girl-icon {
@@ -921,6 +923,8 @@
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
             z-index: 2;
             font-family: 'Ma Shan Zheng', cursive;
+            text-align: center;
+            width: 100%;
         }
 
         .boy-name {
@@ -1387,7 +1391,7 @@
             }
             
             .countdown-container {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, 1fr);
             }
             
             .bottom-buttons {
@@ -1409,8 +1413,23 @@
                 font-size: 45px;
             }
             
+            .icon-name {
+                font-size: 16px;
+                margin-top: 5px;
+            }
+            
             .icon-heart {
-                font-size: 18px;
+                font-size: 20px;
+            }
+            
+            .boy-heart {
+                top: -10px;
+                right: -5px;
+            }
+            
+            .girl-heart {
+                top: -10px;
+                left: -5px;
             }
             
             .diary-filter {
@@ -1472,6 +1491,85 @@
             
             .total-days-number {
                 font-size: 38px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .countdown-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .couple-icons {
+                padding: 0 15px;
+            }
+            
+            .boy-icon, .girl-icon {
+                font-size: 40px;
+            }
+            
+            .icon-name {
+                font-size: 14px;
+                margin-top: 3px;
+            }
+            
+            .icon-heart {
+                font-size: 18px;
+            }
+            
+            .boy-heart {
+                top: -8px;
+                right: -3px;
+            }
+            
+            .girl-heart {
+                top: -8px;
+                left: -3px;
+            }
+            
+            .popup {
+                min-width: 130px;
+                max-width: 180px;
+                font-size: 14px;
+                padding: 12px 15px;
+            }
+        }
+
+        @media (max-width: 375px) {
+            .couple-icons {
+                padding: 0 12px;
+            }
+            
+            .boy-icon, .girl-icon {
+                font-size: 35px;
+            }
+            
+            .icon-name {
+                font-size: 13px;
+            }
+            
+            .icon-heart {
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 320px) {
+            .couple-icons {
+                padding: 0 8px;
+            }
+            
+            .boy-icon, .girl-icon {
+                font-size: 30px;
+            }
+            
+            .icon-name {
+                font-size: 12px;
+            }
+            
+            .popup {
+                min-width: 110px;
+                max-width: 150px;
+                font-size: 12px;
+                padding: 10px 12px;
             }
         }
     </style>
@@ -1725,7 +1823,7 @@
         let popupInterval = null;
         let currentPage = 1;
         let popupCount = 0;
-        const maxPopups = 150;
+        const maxPopups = 100;
         let fallingInterval = null;
         let activeFallingElements = 0;
         const maxFallingElements = 120;
@@ -1859,8 +1957,8 @@
                 clearInterval(fallingInterval);
             }
             
-            for (let i = 0; i < 40; i++) {
-                setTimeout(() => createFallingElement(), i * 100);
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => createFallingElement(), i * 50);
             }
             
             fallingInterval = setInterval(() => {
@@ -2038,7 +2136,7 @@
             
             popupInterval = setInterval(() => {
                 createPopup();
-            }, 100);
+            }, 300);
             
             for (let i = 0; i < 50; i++) {
                 setTimeout(() => createPopup(), i * 50);
@@ -2061,10 +2159,45 @@
                 popup.textContent = messagePopups[Math.floor(Math.random() * messagePopups.length)];
                 popup.classList.add(popupStyles[Math.floor(Math.random() * popupStyles.length)]);
                 
-                const maxX = window.innerWidth - 220;
-                const maxY = window.innerHeight - 220;
-                popup.style.left = Math.random() * maxX + 'px';
-                popup.style.top = Math.random() * maxY + 'px';
+                const screenWidth = window.innerWidth;
+                const screenHeight = window.innerHeight;
+                
+                const colWidth = screenWidth / 3;
+                const rowHeight = screenHeight / 3;
+                
+                const areaIndex = Math.floor(Math.random() * 9);
+                const col = areaIndex % 3;
+                const row = Math.floor(areaIndex / 3);
+                
+                const minX = col * colWidth;
+                const maxX = minX + colWidth - 150;
+                const minY = row * rowHeight;
+                const maxY = minY + rowHeight - 100;
+                
+                let left = Math.max(10, Math.min(maxX, minX + Math.random() * (colWidth - 150)));
+                let top = Math.max(10, Math.min(maxY, minY + Math.random() * (rowHeight - 100)));
+                
+                if (screenWidth < 768) {
+                    const gridCols = 5;
+                    const gridRows = 5;
+                    const mobileColWidth = screenWidth / gridCols;
+                    const mobileRowHeight = screenHeight / gridRows;
+                    
+                    const mobileAreaIndex = Math.floor(Math.random() * (gridCols * gridRows));
+                    const mobileCol = mobileAreaIndex % gridCols;
+                    const mobileRow = Math.floor(mobileAreaIndex / gridCols);
+                    
+                    const mobileMinX = mobileCol * mobileColWidth;
+                    const mobileMaxX = mobileMinX + mobileColWidth - 120;
+                    const mobileMinY = mobileRow * mobileRowHeight;
+                    const mobileMaxY = mobileMinY + mobileRowHeight - 80;
+                    
+                    left = Math.max(5, Math.min(mobileMaxX, mobileMinX + Math.random() * (mobileColWidth - 120)));
+                    top = Math.max(5, Math.min(mobileMaxY, mobileMinY + Math.random() * (mobileRowHeight - 80)));
+                }
+                
+                popup.style.left = left + 'px';
+                popup.style.top = top + 'px';
                 
                 const size = Math.random() * 0.5 + 0.8;
                 const rotation = Math.random() * 20 - 10;
@@ -2375,7 +2508,7 @@
 "你的爱具有一种‘烙印’般的深刻性，它改变着你，也改变着你的伴侣，在彼此的生命中留下了不可逆转的、积极的塑造痕迹，你们因彼此而成为了更好、更完整的自己",
 "如同一位深邃的哲学家，你从不止步于爱情的表面欢愉，总是不断追问其意义、本质与终极形态，这种追问本身，就让你们的爱远离了平庸，走向了伟大",
 "你对于承诺的守护，不是出于义务，而是出于内心深刻的认同与选择的喜悦，这份主动的、充满喜悦的坚守，是你能给予伴侣的最宝贵的礼物之一"        
-];
+        ];
         
         function initHoroscope() {
             const today = new Date().toDateString();
